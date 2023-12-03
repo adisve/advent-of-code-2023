@@ -69,8 +69,12 @@ func calculateSum(file *bufio.Scanner, includeWords bool) int {
 	return totalSum
 }
 
+/** Read each row in input from left to find first number,
+* when first number is found read from the end to find second number -
+* alphabetical numbers are matched against a codebook
+**/
 func main() {
-	file, err := os.Open("input.txt")
+	file, err := os.Open("src/inputs/day01.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -80,11 +84,11 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	part1Sum := calculateSum(scanner, false)
-	fmt.Println("Part 1 sum:", part1Sum)
+	fmt.Println("Day 1 - Part 1: ", part1Sum)
 
 	file.Seek(0, 0)
 	scanner = bufio.NewScanner(file)
 
 	part2Sum := calculateSum(scanner, true)
-	fmt.Println("Part 2 sum:", part2Sum)
+	fmt.Println("Day 1 - Part 2: ", part2Sum)
 }

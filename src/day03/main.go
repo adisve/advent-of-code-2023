@@ -7,6 +7,9 @@ import (
 	"strconv"
 )
 
+/** Determines if a given position is adjacent to a special symbol in the matrix.
+* Returns a boolean indicating adjacency and the position of the adjacent symbol.
+**/
 func isAdjacentToSymbol(symbolMatrix [][]rune, startX, endX, y int) (bool, [2]int) {
 	rows := len(symbolMatrix)
 	cols := len(symbolMatrix[0])
@@ -41,6 +44,9 @@ func isNumeric(char rune) bool {
 	return '0' <= char && char <= '9'
 }
 
+/** Calculates gear ratios based on the adjacency of numbers to a specific symbol ('*') in the schematic.
+* Summarizes the products of numbers adjacent to each '*' symbol.
+**/
 func calculateGearRatios(numberIndices [][3]int, schematic [][]rune) int {
 	adjacencies := make(map[[2]int][]int)
 	for _, indices := range numberIndices {
@@ -65,6 +71,8 @@ func calculateGearRatios(numberIndices [][3]int, schematic [][]rune) int {
 	return sum
 }
 
+/** Calculates the sum of numbers in the schematic that are adjacent to any symbol.
+**/
 func calculateSumParts(numberIndices [][3]int, schematic [][]rune) int {
 	sum := 0
 	for _, indices := range numberIndices {
@@ -77,6 +85,9 @@ func calculateSumParts(numberIndices [][3]int, schematic [][]rune) int {
 	return sum
 }
 
+/** Identifies and returns the indices of numeric sequences in the schematic.
+* Each sequence is represented by a start index, end index, and row number.
+**/
 func getNumIndices(schematic [][]rune) [][3]int {
 	var numberIndices [][3]int
 	for y, row := range schematic {
@@ -100,7 +111,7 @@ func getNumIndices(schematic [][]rune) [][3]int {
 }
 
 func main() {
-	file, err := os.Open("input.txt")
+	file, err := os.Open("src/inputs/day03.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
 		return
@@ -119,6 +130,6 @@ func main() {
 	sumParts := calculateSumParts(numberIndices, schematic)
 	gearRatios := calculateGearRatios(numberIndices, schematic)
 
-	fmt.Println("Day 3 - Part 1:", sumParts)
-	fmt.Println("Day 3 - Part 2:", gearRatios)
+	fmt.Println("Day 3 - Part 1: ", sumParts)
+	fmt.Println("Day 3 - Part 2: ", gearRatios)
 }

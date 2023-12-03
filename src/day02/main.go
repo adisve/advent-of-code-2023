@@ -14,6 +14,9 @@ var caseLimits = map[string]int{
 	"blue":  14,
 }
 
+/** Opens a file at the given path and reads its content line by line.
+* Each line is assumed to be a game, and the function returns a slice of these games as strings.
+**/
 func readGamesFromFile(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -29,6 +32,10 @@ func readGamesFromFile(path string) ([]string, error) {
 	return games, scanner.Err()
 }
 
+/** Takes a string representing a game and splits it into turns.
+* Each turn is processed to extract counts of colors and returns a slice of maps,
+* where each map represents the counts of colors in a turn.
+**/
 func parseGame(gameStr string) []map[string]int {
 	parts := strings.Split(gameStr, ":")
 	turns := strings.Split(parts[len(parts)-1], ";")
@@ -39,6 +46,9 @@ func parseGame(gameStr string) []map[string]int {
 	return turnCounts
 }
 
+/** Takes a string representing a turn and splits it into cases of colors.
+* Parse the counts of each color and updates the counts if the new count is higher than the existing one.
+**/
 func processTurn(turnStr string) map[string]int {
 	counts := map[string]int{"red": 0, "green": 0, "blue": 0}
 	cases := strings.Split(turnStr, ",")
@@ -55,6 +65,9 @@ func processTurn(turnStr string) map[string]int {
 	return counts
 }
 
+/** Iterate over each turn's color count map.
+* Check if any color count exceeds the predefined limit, returning false if so.
+**/
 func isGameValid(turnCounts []map[string]int) bool {
 	for _, turn := range turnCounts {
 		for color, amount := range turn {
@@ -66,8 +79,10 @@ func isGameValid(turnCounts []map[string]int) bool {
 	return true
 }
 
+/** Calculate the product of the highest count of each color across all turns.
+**/
 func getLeastAmount(turnCounts []map[string]int) int {
-	mins := map[string]int{ "red": 0, "green": 0, "blue": 0 }
+	mins := map[string]int{"red": 0, "green": 0, "blue": 0}
 	for _, turn := range turnCounts {
 		for color, amount := range turn {
 			if amount > mins[color] {
@@ -82,8 +97,12 @@ func getLeastAmount(turnCounts []map[string]int) int {
 	return product
 }
 
+/** Reads games from a file, processes each game,
+* and calculates the sum of valid game IDs and the sum of
+* least amounts of colors across all games.
+**/
 func main() {
-	games, err := readGamesFromFile("input.txt")
+	games, err := readGamesFromFile("src/inputs/day02.txt")
 	if err != nil {
 		fmt.Println("Error reading file:", err)
 		return
@@ -99,6 +118,6 @@ func main() {
 		powerSetsSum += getLeastAmount(turnCounts)
 	}
 
-	fmt.Println("Sum of valid games:", validGamesSum)
-	fmt.Println("Sum of the power of sets of least amount of cubes:", powerSetsSum)
+	fmt.Println("Day 2 - Part 1: ", validGamesSum)
+	fmt.Println("Day 2 - Part 2: ", powerSetsSum)
 }
