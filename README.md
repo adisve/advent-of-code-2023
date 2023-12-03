@@ -1,4 +1,4 @@
-# Advent of Code - Golang Editiion
+# Advent of Code - Go Editiion
 
 ## About
 
