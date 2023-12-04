@@ -95,38 +95,46 @@ func getCardSums(scratchCards []Card) int {
 	return cardSums
 }
 
-/** Recursively cascades through the cards, starting at the given offset which
- * depends on the card's position in the input list of Cards.
- */
-func cascade(card Card, offset int, scratchCards []Card) int {
-	cardMatches := len(utils.Intersection(card.ElfNumbers, card.WinningNumbers))
-	if cardMatches == 0 {
-		return 0
-	}
+func cascade(startIndex int, scratchCards []Card, intersections []int) int {
+    stack := []int{startIndex}
+    totalCopies := 0
 
-	totalCopies := 0
-	for i := 0; i < cardMatches; i++ {
-		nextCardIndex := offset + i + 1
-		if nextCardIndex < len(scratchCards) {
-			nextCard := scratchCards[nextCardIndex]
-			totalCopies += 1 + cascade(nextCard, nextCardIndex, scratchCards)
-		}
-	}
-	return totalCopies
+    for len(stack) > 0 {
+        index := stack[len(stack)-1]
+        stack = stack[:len(stack)-1]
+
+        cardMatches := intersections[index]
+        if cardMatches == 0 {
+            continue
+        }
+
+        for i := 0; i < cardMatches; i++ {
+            nextCardIndex := index + i + 1
+            if nextCardIndex < len(scratchCards) {
+                totalCopies++
+                stack = append(stack, nextCardIndex)
+            }
+        }
+    }
+
+    return totalCopies
 }
 
-/** Counts the number of cards recursively by cascading through the cards.
- */
 func countCards(scratchCards []Card) int {
-	totalCards := 0
+    totalCards := len(scratchCards)
 
-	for offset, card := range scratchCards {
-		totalCards += 1
-		totalCards += cascade(card, offset, scratchCards)
-	}
+    intersections := make([]int, len(scratchCards))
+    for i, card := range scratchCards {
+        intersections[i] = len(utils.Intersection(card.ElfNumbers, card.WinningNumbers))
+    }
 
-	return totalCards
+    for i := range scratchCards {
+        totalCards += cascade(i, scratchCards, intersections)
+    }
+
+    return totalCards
 }
+
 
 func Run() {
 	cards, err := readCardsFromFile("src/inputs/day04.txt")
