@@ -1,4 +1,4 @@
-# Advent of Code - Go Editiion
+# Advent of Code - Go Edition
 
 ## About
 
