@@ -43,7 +43,6 @@ func parseGame(gameStr string) []map[string]int {
 	for _, turn := range turns {
 		turnCounts = append(turnCounts, processTurn(turn))
 	}
-	fmt.Println(turnCounts)
 	return turnCounts
 }
 

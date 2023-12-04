@@ -4,6 +4,7 @@ import (
 	"adventofcode/src/utils"
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -65,19 +66,23 @@ func parseNumbers(numberStr string) []int {
  * number between the elf numbers and the winning numbers.
  */
 func getCardValue(card Card) int {
-	cardValue := 0
-	for _, elfNum := range card.ElfNumbers {
-		for _, winNum := range card.WinningNumbers {
-			if elfNum == winNum {
-				if cardValue == 0 {
-					cardValue = 1
-				} else {
-					cardValue = 2 * cardValue
-				}
-			}
+	elfSet := make(map[int]struct{})
+	for _, num := range card.ElfNumbers {
+		elfSet[num] = struct{}{}
+	}
+
+	intersectionCount := 0
+	for _, num := range card.WinningNumbers {
+		if _, exists := elfSet[num]; exists {
+			intersectionCount++
 		}
 	}
-	return cardValue
+
+	if intersectionCount == 0 {
+		return 0
+	}
+
+	return int(math.Pow(2, float64(intersectionCount-1)))
 }
 
 /** Calculates the sum of the card values.
