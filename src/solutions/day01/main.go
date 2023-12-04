@@ -1,4 +1,4 @@
-package main
+package day01
 
 import (
 	"bufio"
@@ -73,7 +73,7 @@ func calculateSum(file *bufio.Scanner, includeWords bool) int {
 * when first number is found read from the end to find second number -
 * alphabetical numbers are matched against a codebook
 **/
-func main() {
+func Run() {
 	file, err := os.Open("src/inputs/day01.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)

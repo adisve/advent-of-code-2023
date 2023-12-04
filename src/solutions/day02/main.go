@@ -1,4 +1,4 @@
-package main
+package day02
 
 import (
 	"bufio"
@@ -43,6 +43,7 @@ func parseGame(gameStr string) []map[string]int {
 	for _, turn := range turns {
 		turnCounts = append(turnCounts, processTurn(turn))
 	}
+	fmt.Println(turnCounts)
 	return turnCounts
 }
 
@@ -101,7 +102,7 @@ func getLeastAmount(turnCounts []map[string]int) int {
 * and calculates the sum of valid game IDs and the sum of
 * least amounts of colors across all games.
 **/
-func main() {
+func Run() {
 	games, err := readGamesFromFile("src/inputs/day02.txt")
 	if err != nil {
 		fmt.Println("Error reading file:", err)

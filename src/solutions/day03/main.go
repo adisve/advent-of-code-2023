@@ -1,4 +1,4 @@
-package main
+package day03
 
 import (
 	"bufio"
@@ -110,7 +110,7 @@ func getNumIndices(schematic [][]rune) [][3]int {
 	return numberIndices
 }
 
-func main() {
+func Run() {
 	file, err := os.Open("src/inputs/day03.txt")
 	if err != nil {
 		fmt.Println("Error opening file:", err)
