@@ -95,38 +95,53 @@ func getCardSums(scratchCards []Card) int {
 	return cardSums
 }
 
-/** Recursively cascades through the cards, starting at the given offset which
- * depends on the card's position in the input list of Cards.
+/** Iteratively cascades through the cards, starting at the given offset, which
+ * depends on the card's position in the input list of Cards. Using a stack and while loop
+ * proved to be significantly faster than using recursion.
  */
-func cascade(card Card, offset int, scratchCards []Card) int {
-	cardMatches := len(utils.Intersection(card.ElfNumbers, card.WinningNumbers))
-	if cardMatches == 0 {
-		return 0
-	}
+func cascadeAllCards(startIndex int, scratchCards []Card, intersections []int) int {
+    stack := []int{startIndex}
+    totalCards := 0
 
-	totalCopies := 0
-	for i := 0; i < cardMatches; i++ {
-		nextCardIndex := offset + i + 1
-		if nextCardIndex < len(scratchCards) {
-			nextCard := scratchCards[nextCardIndex]
-			totalCopies += 1 + cascade(nextCard, nextCardIndex, scratchCards)
-		}
-	}
-	return totalCopies
+    for len(stack) > 0 {
+        index := stack[len(stack)-1]
+        stack = stack[:len(stack)-1] // New stack of card positions without the card we will process in current iter
+
+        cardMatches := intersections[index]
+        if cardMatches == 0 {
+            continue
+        }
+
+        for i := 0; i < cardMatches; i++ {
+            nextCardIndex := index + i + 1
+            if nextCardIndex < len(scratchCards) {
+                totalCards++
+                stack = append(stack, nextCardIndex)
+            }
+        }
+    }
+
+    return totalCards
 }
 
-/** Counts the number of cards recursively by cascading through the cards.
+/** Counts the number of cards iteratively by cascading through the cards,
+ * pre-computing the number of intersections between each card first.
  */
 func countCards(scratchCards []Card) int {
-	totalCards := 0
+    totalCards := len(scratchCards)
 
-	for offset, card := range scratchCards {
-		totalCards += 1
-		totalCards += cascade(card, offset, scratchCards)
-	}
+    intersections := make([]int, len(scratchCards))
+    for i, card := range scratchCards {
+        intersections[i] = len(utils.Intersection(card.ElfNumbers, card.WinningNumbers))
+    }
 
-	return totalCards
+    for i := range scratchCards {
+        totalCards += cascadeAllCards(i, scratchCards, intersections)
+    }
+
+    return totalCards
 }
+
 
 func Run() {
 	cards, err := readCardsFromFile("src/inputs/day04.txt")
