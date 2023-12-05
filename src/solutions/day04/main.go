@@ -99,13 +99,13 @@ func getCardSums(scratchCards []Card) int {
  * depends on the card's position in the input list of Cards. Using a stack and while loop
  * proved to be significantly faster than using recursion.
  */
-func cascade(startIndex int, scratchCards []Card, intersections []int) int {
+func cascadeAllCards(startIndex int, scratchCards []Card, intersections []int) int {
     stack := []int{startIndex}
-    totalCopies := 0
+    totalCards := 0
 
     for len(stack) > 0 {
         index := stack[len(stack)-1]
-        stack = stack[:len(stack)-1]
+        stack = stack[:len(stack)-1] // New stack of card positions without the card we will process in current iter
 
         cardMatches := intersections[index]
         if cardMatches == 0 {
@@ -115,13 +115,13 @@ func cascade(startIndex int, scratchCards []Card, intersections []int) int {
         for i := 0; i < cardMatches; i++ {
             nextCardIndex := index + i + 1
             if nextCardIndex < len(scratchCards) {
-                totalCopies++
+                totalCards++
                 stack = append(stack, nextCardIndex)
             }
         }
     }
 
-    return totalCopies
+    return totalCards
 }
 
 /** Counts the number of cards iteratively by cascading through the cards,
@@ -136,7 +136,7 @@ func countCards(scratchCards []Card) int {
     }
 
     for i := range scratchCards {
-        totalCards += cascade(i, scratchCards, intersections)
+        totalCards += cascadeAllCards(i, scratchCards, intersections)
     }
 
     return totalCards
