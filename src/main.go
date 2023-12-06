@@ -6,6 +6,7 @@ import (
 	"adventofcode/src/solutions/day03"
 	"adventofcode/src/solutions/day04"
 	"adventofcode/src/solutions/day05"
+	"adventofcode/src/solutions/day06"
 	"bufio"
 	"fmt"
 	"os"
@@ -31,6 +32,8 @@ func main() {
 			day04.Run()
 		case "5":
 			day05.Run()
+		case "6":
+			day06.Run()
 		case "q", "exit", "quit":
 			os.Exit(0)
 		default:

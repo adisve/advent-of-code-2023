@@ -15,27 +15,20 @@ type RangeMap struct {
 	DestinationStart int
 }
 
-func parseRangeMap(s []string) (RangeMap, error) {
-	if len(s) < 3 {
-		return RangeMap{}, fmt.Errorf("invalid range map")
-	}
-	sourceStart, err := strconv.Atoi(s[1])
-	if err != nil {
-		return RangeMap{}, err
-	}
-	rangeLen, err := strconv.Atoi(s[2])
-	if err != nil {
-		return RangeMap{}, err
-	}
-	destinationStart, err := strconv.Atoi(s[0])
-	if err != nil {
-		return RangeMap{}, err
-	}
+type SeedRange struct {
+	Start int
+	End   int
+}
+
+func parseRangeMap(s []string) RangeMap {
+	sourceStart, _ := strconv.Atoi(s[1])
+	rangeLen, _ := strconv.Atoi(s[2])
+	destinationStart, _ := strconv.Atoi(s[0])
 	return RangeMap{
 		SourceStart:      sourceStart,
 		SourceEnd:        sourceStart + rangeLen,
 		DestinationStart: destinationStart,
-	}, nil
+	}
 }
 
 func transformValue(val int, maps []RangeMap) int {
@@ -47,68 +40,50 @@ func transformValue(val int, maps []RangeMap) int {
 	return val
 }
 
-func processSeeds(path string, rangeMapSets [][][]string, isRange bool) (int, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return 0, err
-	}
+func readSeedsAsRange(path string) []SeedRange {
+	file, _ := os.Open(path)
 	defer file.Close()
 
-	lowest := math.MaxInt32
+	var seeds []SeedRange
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "seeds: ") {
 			seedStrs := strings.Fields(strings.TrimPrefix(line, "seeds: "))
-			for i := 0; i < len(seedStrs); i++ {
-				var seed, upperBound int
-
-				if isRange {
-					seed, _ = strconv.Atoi(seedStrs[i])
-					seedRange, _ := strconv.Atoi(seedStrs[i+1])
-					upperBound = seedRange + seed
-					i++
-				} else {
-					seed, _ = strconv.Atoi(seedStrs[i])
-					upperBound = seed + 1
-				}
-
-				for seed < upperBound {
-					transformedSeed := seed
-					for _, rangeMaps := range rangeMapSets {
-						var maps []RangeMap
-						for _, rangeMap := range rangeMaps {
-							rm, err := parseRangeMap(rangeMap)
-							if err != nil {
-								return 0, fmt.Errorf("error parsing range map: %w", err)
-							}
-							maps = append(maps, rm)
-						}
-						transformedSeed = transformValue(transformedSeed, maps)
-					}
-
-					if transformedSeed < lowest {
-						lowest = transformedSeed
-					}
-					seed++
-				}
+			for i := 0; i < len(seedStrs); i += 2 {
+				seed, _ := strconv.Atoi(seedStrs[i])
+				count, _ := strconv.Atoi(seedStrs[i+1])
+				upperBound := count + seed
+				seeds = append(seeds, SeedRange{ seed, upperBound })
 			}
 		}
 	}
-
-	if err := scanner.Err(); err != nil {
-		return 0, err
-	}
-
-	return lowest, nil
+	return seeds
 }
 
-func readRangeMaps(path string) ([][][]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
+func readSeeds(path string) []int {
+	file, _ := os.Open(path)
+	defer file.Close()
+
+	var seeds []int
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "seeds: ") {
+			seedStrs := strings.Fields(strings.TrimPrefix(line, "seeds: "))
+			for _, s := range seedStrs {
+				seed, _ := strconv.Atoi(s)
+				seeds = append(seeds, seed)
+			}
+		}
 	}
+	return seeds
+}
+
+func readRangeMaps(path string) [][][]string {
+	file, _ := os.Open(path)
 	defer file.Close()
 
 	var maps [][][]string
@@ -125,41 +100,61 @@ func readRangeMaps(path string) ([][][]string, error) {
 				currentMap = nil
 			}
 		} else if line != "" && isInMapSection {
-			if !strings.HasPrefix(line, "seeds:") {
-				values := strings.Fields(line)
-				currentMap = append(currentMap, values)
-			}
+			values := strings.Fields(line)
+			currentMap = append(currentMap, values)
 		}
 	}
 	if currentMap != nil {
 		maps = append(maps, currentMap)
 	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
+	return maps
+}
 
-	return maps, nil
+func findLowestTransformedSeedInRange(seedRanges []SeedRange, rangeMapSets [][][]string) int {
+	lowest := math.MaxInt32
+	for _, seedRange := range seedRanges {
+		for seed := seedRange.Start; seed < seedRange.End; seed++ {
+			lowest = transformSeed(seed, lowest, rangeMapSets)
+		}
+	}
+	return lowest
+}
+
+func findLowestTransformedSeed(seeds []int, rangeMapSets [][][]string) int {
+	lowest := math.MaxInt32
+	for _, seed := range seeds {
+		lowest = transformSeed(seed, lowest, rangeMapSets)
+	}
+	return lowest
+}
+
+func transformSeed(seed int, lowest int, rangeMapSets [][][]string) int  {
+	transformedSeed := seed
+	for _, rangeMaps := range rangeMapSets {
+		var maps []RangeMap
+		for _, rangeMap := range rangeMaps { // Read all the maps related to a specific transformation of a seed based on position
+			rm := parseRangeMap(rangeMap)
+			maps = append(maps, rm)
+		}
+		transformedSeed = transformValue(transformedSeed, maps)
+	}
+	if transformedSeed < lowest {
+		return transformedSeed
+	}
+	return lowest
 }
 
 func Run() {
 	dayPath := "src/inputs/day05.txt"
-	rangeMapSets, err := readRangeMaps(dayPath)
-	if err != nil {
-		fmt.Println("Error reading range maps:", err)
-		return
-	}
 
-	lowestTransformedSeedOne, err := processSeeds(dayPath, rangeMapSets, false)
-	if err != nil {
-		fmt.Println("Error processing seeds:", err)
-		return
-	}
+	seeds := readSeeds(dayPath)
+	rangeMapSets := readRangeMaps(dayPath)
+
+	lowestTransformedSeedOne := findLowestTransformedSeed(seeds, rangeMapSets)
 	fmt.Println("Day 5 - Part 1:", lowestTransformedSeedOne)
 
-	lowestTransformedSeedTwo, err := processSeeds(dayPath, rangeMapSets, true)
-	if err != nil {
-		fmt.Println("Error processing seeds as range:", err)
-		return
-	}
+	seedsAsRange := readSeedsAsRange(dayPath)
+	lowestTransformedSeedTwo := findLowestTransformedSeedInRange(seedsAsRange, rangeMapSets)
+
 	fmt.Println("Day 5 - Part 2:", lowestTransformedSeedTwo)
 }
