@@ -7,33 +7,31 @@ import (
 	"strings"
 )
 
-
 func readInput(path string) ([]int, []int) {
-    content, _ := os.ReadFile(path)
-    lines := strings.Split(string(content), "\n")
+	content, _ := os.ReadFile(path)
+	lines := strings.Split(string(content), "\n")
 
-    toIntSlice := func(s []string) []int {
-        intSlice := make([]int, len(s))
-        for i, v := range s {
-            intSlice[i], _ = strconv.Atoi(v)
-        }
-        return intSlice
-    }
+	toIntSlice := func(s []string) []int {
+		intSlice := make([]int, len(s))
+		for i, v := range s {
+			intSlice[i], _ = strconv.Atoi(v)
+		}
+		return intSlice
+	}
 
-    times := toIntSlice(strings.Fields(strings.TrimPrefix(lines[0], "Time: ")))
-    distances := toIntSlice(strings.Fields(strings.TrimPrefix(lines[1], "Distance: ")))
+	times := toIntSlice(strings.Fields(strings.TrimPrefix(lines[0], "Time: ")))
+	distances := toIntSlice(strings.Fields(strings.TrimPrefix(lines[1], "Distance: ")))
 
-    return times, distances
+	return times, distances
 }
 
-
 func calculateRaces(times []int, distances []int) int {
-    product := 1
-    for i, time := range times {
-        makeProduct(time, distances[i], &product)
-    }
+	product := 1
+	for i, time := range times {
+		makeProduct(time, distances[i], &product)
+	}
 
-    return product
+	return product
 }
 
 func calculateRace(times []int, distances []int) int {
@@ -47,12 +45,12 @@ func calculateRace(times []int, distances []int) int {
 }
 
 /** The calculation for the distance is essentially a quadratic,
- * so the key is to get the button hold times before and after 
+ * so the key is to get the button hold times before and after
  * the vertex where your possible distance in the race exceeds
  * the specific record distance.
  *
  * worst-case runtime complexity of the function is O(m x n)
-*/
+ */
 func makeProduct(time int, distance int, product *int) {
 	vertex := time / 2
 
@@ -80,7 +78,6 @@ func makeProduct(time int, distance int, product *int) {
 	*product *= winnings
 }
 
-
 func toInt(list []int) int {
 	var resultStr string
 	for _, num := range list {
@@ -89,7 +86,6 @@ func toInt(list []int) int {
 	result, _ := strconv.Atoi(resultStr)
 	return result
 }
-
 
 func Run() {
 	times, distances := readInput("src/inputs/day06.txt")
